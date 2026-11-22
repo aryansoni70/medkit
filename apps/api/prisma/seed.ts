@@ -125,9 +125,36 @@ async function main() {
     prisma.user.create({
       data: {
         name: 'Ramesh Patel',
-        email: 'pending.chemist@medkit.in',
+        email: 'sudamanagar.patel@medkit.in',
         passwordHash,
         phone: '+91 731 299 4455',
+        role: 'PHARMACY'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Sunil Rathore',
+        email: 'bengalisquare.rathore@medkit.in',
+        passwordHash,
+        phone: '+91 731 249 8811',
+        role: 'PHARMACY'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Gopal Sharma',
+        email: 'gurukripa.lig@medkit.in',
+        passwordHash,
+        phone: '+91 731 257 6633',
+        role: 'PHARMACY'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Mahesh Patel',
+        email: 'shubh.rau@medkit.in',
+        passwordHash,
+        phone: '+91 731 285 4477',
         role: 'PHARMACY'
       }
     })
@@ -315,11 +342,11 @@ async function main() {
       }
     }),
 
-    // 9: Pending Verification Pharmacy in Indore (for admin demo approvals)
+    // 9: Patel Medicose - Sudama Nagar, Indore
     prisma.pharmacy.create({
       data: {
         ownerId: pharmacyOwners[9].id,
-        name: 'Patel Medicose - Sudama Nagar, Indore',
+        name: 'Patel Medicose & Healthcare - Sudama Nagar',
         address: 'Sector E, Near Footi Kothi, Sudama Nagar',
         city: 'Indore',
         state: 'Madhya Pradesh',
@@ -328,10 +355,70 @@ async function main() {
         longitude: 75.8280,
         phone: '+91 731 299 4455',
         email: 'sudamanagar.patel@medkit.in',
-        openingHours: '09:00 AM - 10:00 PM',
+        openingHours: '09:00 AM - 10:30 PM',
         licenseNumber: 'MP-IND-20B-991133/2024',
-        verificationStatus: 'PENDING',
-        rating: 4.3
+        verificationStatus: 'VERIFIED',
+        rating: 4.7
+      }
+    }),
+
+    // 10: Bengali Square 24x7 Pharmacy - Kanadia Road, Indore
+    prisma.pharmacy.create({
+      data: {
+        ownerId: pharmacyOwners[10].id,
+        name: 'Bengali Square 24x7 Pharmacy & Healthcare',
+        address: 'Shop 8-9, Surya Arcade, Near Bengali Square, Kanadia Road',
+        city: 'Indore',
+        state: 'Madhya Pradesh',
+        postalCode: '452016',
+        latitude: 22.7198,
+        longitude: 75.9080,
+        phone: '+91 731 249 8811',
+        email: 'bengalisquare.rathore@medkit.in',
+        openingHours: '24 Hours Open',
+        licenseNumber: 'MP-IND-20B-883311/2022',
+        verificationStatus: 'VERIFIED',
+        rating: 4.8
+      }
+    }),
+
+    // 11: Gurukripa Medicose - LIG Square, Indore
+    prisma.pharmacy.create({
+      data: {
+        ownerId: pharmacyOwners[11].id,
+        name: 'Gurukripa Medicose & Surgical - LIG Square',
+        address: '4, LIG Colony Main Road, Near LIG Square, A.B. Road',
+        city: 'Indore',
+        state: 'Madhya Pradesh',
+        postalCode: '452008',
+        latitude: 22.7350,
+        longitude: 75.8850,
+        phone: '+91 731 257 6633',
+        email: 'gurukripa.lig@medkit.in',
+        openingHours: '08:00 AM - 11:00 PM',
+        licenseNumber: 'MP-IND-20B-774422/2021',
+        verificationStatus: 'VERIFIED',
+        rating: 4.7
+      }
+    }),
+
+    // 12: Shubh Medical Store - Rau Bypass, Indore
+    prisma.pharmacy.create({
+      data: {
+        ownerId: pharmacyOwners[12].id,
+        name: 'Shubh Medical Store - Rau Circle & Bypass',
+        address: '15, Opposite Indian Oil Petrol Pump, AB Road, Rau',
+        city: 'Indore',
+        state: 'Madhya Pradesh',
+        postalCode: '453331',
+        latitude: 22.6372,
+        longitude: 75.8038,
+        phone: '+91 731 285 4477',
+        email: 'shubh.rau@medkit.in',
+        openingHours: '08:30 AM - 11:00 PM',
+        licenseNumber: 'MP-IND-20B-339900/2023',
+        verificationStatus: 'VERIFIED',
+        rating: 4.6
       }
     })
   ]);
@@ -720,9 +807,33 @@ async function main() {
     { pharmacyIdx: 8, medIdx: 10, qty: 30, price: 208.00, mrp: 225.00, hoursAgo: 2 }, // Allegra 120
     { pharmacyIdx: 8, medIdx: 17, qty: 110, price: 21.00, mrp: 23.50, hoursAgo: 1 }, // Electral
 
-    // 9: Pending Patel Medicose Sudama Nagar (for admin demo)
-    { pharmacyIdx: 9, medIdx: 0, qty: 30, price: 30.50, mrp: 33.50, hoursAgo: 12 },
-    { pharmacyIdx: 9, medIdx: 1, qty: 20, price: 14.50, mrp: 16.00, hoursAgo: 12 }
+    // 9: Patel Medicose Sudama Nagar, Indore
+    { pharmacyIdx: 9, medIdx: 0, qty: 55, price: 29.50, mrp: 33.50, hoursAgo: 2 }, // Dolo 650
+    { pharmacyIdx: 9, medIdx: 1, qty: 40, price: 14.00, mrp: 16.00, hoursAgo: 2 }, // Calpol 500
+    { pharmacyIdx: 9, medIdx: 2, qty: 35, price: 42.00, mrp: 45.00, hoursAgo: 1 }, // Combiflam
+    { pharmacyIdx: 9, medIdx: 4, qty: 20, price: 196.00, mrp: 215.00, hoursAgo: 3 }, // Augmentin 625
+    { pharmacyIdx: 9, medIdx: 13, qty: 60, price: 48.00, mrp: 52.00, hoursAgo: 2 }, // Becosules Z
+
+    // 10: Bengali Square 24x7 Pharmacy, Indore
+    { pharmacyIdx: 10, medIdx: 0, qty: 90, price: 29.00, mrp: 33.50, hoursAgo: 1 }, // Dolo 650
+    { pharmacyIdx: 10, medIdx: 1, qty: 65, price: 13.80, mrp: 16.00, hoursAgo: 1 }, // Calpol 500
+    { pharmacyIdx: 10, medIdx: 5, qty: 30, price: 112.00, mrp: 125.00, hoursAgo: 2 }, // Azithral 500
+    { pharmacyIdx: 10, medIdx: 7, qty: 45, price: 180.00, mrp: 205.00, hoursAgo: 1 }, // Pan-D
+    { pharmacyIdx: 10, medIdx: 17, qty: 120, price: 20.50, mrp: 23.50, hoursAgo: 1 }, // Electral
+
+    // 11: Gurukripa Medicose - LIG Square, Indore
+    { pharmacyIdx: 11, medIdx: 0, qty: 80, price: 28.50, mrp: 33.50, hoursAgo: 2 }, // Dolo 650
+    { pharmacyIdx: 11, medIdx: 2, qty: 50, price: 41.00, mrp: 45.00, hoursAgo: 1 }, // Combiflam
+    { pharmacyIdx: 11, medIdx: 6, qty: 40, price: 42.50, mrp: 48.00, hoursAgo: 2 }, // Ciplox 500
+    { pharmacyIdx: 11, medIdx: 10, qty: 35, price: 210.00, mrp: 225.00, hoursAgo: 1 }, // Allegra 120
+    { pharmacyIdx: 11, medIdx: 14, qty: 60, price: 122.00, mrp: 140.00, hoursAgo: 2 }, // Shelcal 500
+
+    // 12: Shubh Medical Store - Rau Bypass, Indore
+    { pharmacyIdx: 12, medIdx: 0, qty: 70, price: 30.00, mrp: 33.50, hoursAgo: 1 }, // Dolo 650
+    { pharmacyIdx: 12, medIdx: 1, qty: 45, price: 14.00, mrp: 16.00, hoursAgo: 2 }, // Calpol 500
+    { pharmacyIdx: 12, medIdx: 4, qty: 25, price: 195.00, mrp: 215.00, hoursAgo: 3 }, // Augmentin 625
+    { pharmacyIdx: 12, medIdx: 8, qty: 40, price: 62.00, mrp: 70.00, hoursAgo: 2 }, // Omez 20
+    { pharmacyIdx: 12, medIdx: 17, qty: 85, price: 21.00, mrp: 23.50, hoursAgo: 1 }  // Electral
   ];
 
   let totalInventoriesCreated = 0;

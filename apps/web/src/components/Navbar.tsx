@@ -88,12 +88,18 @@ export function Navbar() {
             <Link
               href="/search"
               className={`hover:text-primary transition-colors ${
-                pathname.startsWith('/search') || pathname.startsWith('/medicines')
-                  ? 'text-primary font-semibold'
-                  : ''
+                pathname === '/search' ? 'text-primary font-semibold' : ''
               }`}
             >
               Find Medicines
+            </Link>
+            <Link
+              href="/pharmacies"
+              className={`hover:text-primary transition-colors ${
+                pathname === '/pharmacies' ? 'text-primary font-semibold' : ''
+              }`}
+            >
+              Medical Stores (10+)
             </Link>
             <Link
               href="/#how-it-works"
@@ -242,6 +248,13 @@ export function Navbar() {
               className="block py-2 text-brandText-primary hover:text-primary font-medium"
             >
               Find Medicines & Pharmacies
+            </Link>
+            <Link
+              href="/pharmacies"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-2 text-brandText-primary hover:text-primary font-medium"
+            >
+              Medical Stores Directory (10+)
             </Link>
             <Link
               href="/#how-it-works"

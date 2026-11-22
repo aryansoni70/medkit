@@ -66,6 +66,9 @@ export const api = {
 
   // Pharmacies
   pharmacies: {
+    getAll: () => fetcher('/pharmacies/all'),
+    createManual: (data: any) =>
+      fetcher('/pharmacies/manual', { method: 'POST', body: JSON.stringify(data) }),
     getNearby: (params: Record<string, any> = {}) => {
       const query = new URLSearchParams();
       Object.entries(params).forEach(([key, val]) => {

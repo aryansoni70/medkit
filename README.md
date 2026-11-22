@@ -62,6 +62,17 @@ flowchart TD
     V1 -->|Suspicious Activity| SP[Status: SUSPENDED]
 ```
 
+### 4. Manual Medical Store Onboarding & Instant Verification Flow
+```mermaid
+flowchart LR
+    M1[User or Chemist] -->|Clicks '+ Add Medical Store Manually'| M2[Input Form: Name, Area in Indore, Address, Phone, Timings]
+    M2 --> M3[Select Indore Area: Vijay Nagar, Palasia, Bhawarkua, Rajwada, etc.]
+    M3 --> M4[Auto-Coordinates Assigned & Auto-Prestocking Selected]
+    M4 --> M5[POST /api/v1/pharmacies/manual]
+    M5 --> M6[Store Saved with VERIFIED Status & Pre-Seeded Medicines]
+    M6 --> M7[Instantly Appears in Search & Live Raw Directory]
+```
+
 ---
 
 ## 💻 Tech Stack
@@ -223,6 +234,8 @@ The platform is pre-loaded with verified pharmacies across key Indore regions:
 | `GET` | `/api/v1/medicines` | Search medicines with pagination & filters | No |
 | `GET` | `/api/v1/medicines/suggest` | Autocomplete medicine search query | No |
 | `GET` | `/api/v1/medicines/:id` | Get single medicine details & pharmacies | No |
+| `GET` | `/api/v1/pharmacies/all` | Get full raw directory of all verified medical stores | No |
+| `POST`| `/api/v1/pharmacies/manual` | Manually add and instantly verify an Indore medical store | No |
 | `GET` | `/api/v1/pharmacies/nearby` | Haversine nearby pharmacies search | No |
 | `GET` | `/api/v1/pharmacies/:id` | Public pharmacy profile & stock list | No |
 | `POST` | `/api/v1/pharmacies/register` | Submit pharmacy onboarding application | Yes |

@@ -68,26 +68,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: { email: string; password: string }): Promise<User> => {
     const res = await api.auth.login(credentials);
-    if (res.success && res.data?.user) {
-      if (res.data.token) {
-        setStoredToken(res.data.token);
+    const userObj = res.data?.user || res.user;
+    const tokenVal = res.data?.token || res.token;
+    if (res.success && userObj) {
+      if (tokenVal) {
+        setStoredToken(tokenVal);
       }
-      setUser(res.data.user);
-      localStorage.setItem('medkit_user', JSON.stringify(res.data.user));
-      return res.data.user;
+      setUser(userObj);
+      localStorage.setItem('medkit_user', JSON.stringify(userObj));
+      return userObj;
     }
     throw new Error(res.error || 'Login failed');
   };
 
   const register = async (userData: any): Promise<User> => {
     const res = await api.auth.register(userData);
-    if (res.success && res.data?.user) {
-      if (res.data.token) {
-        setStoredToken(res.data.token);
+    const userObj = res.data?.user || res.user;
+    const tokenVal = res.data?.token || res.token;
+    if (res.success && userObj) {
+      if (tokenVal) {
+        setStoredToken(tokenVal);
       }
-      setUser(res.data.user);
-      localStorage.setItem('medkit_user', JSON.stringify(res.data.user));
-      return res.data.user;
+      setUser(userObj);
+      localStorage.setItem('medkit_user', JSON.stringify(userObj));
+      return userObj;
     }
     throw new Error(res.error || 'Registration failed');
   };

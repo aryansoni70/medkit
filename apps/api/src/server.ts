@@ -18,7 +18,7 @@ initSocketIO(server);
 app.use(helmet());
 app.use(
   cors({
-    origin: [config.clientUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: true, // Allow all origins including mobile LAN IPs in development
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

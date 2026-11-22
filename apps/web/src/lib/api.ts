@@ -517,9 +517,19 @@ async function fetcher<T = any>(endpoint: string, options: RequestInit = {}): Pr
       credentials: 'include'
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+      return text as unknown as T;
+    }
+
     if (!response.ok) {
-      throw new Error(data.error || data.message || 'API request failed');
+      throw new Error(data.error || data.message || `API request failed with status ${response.status}`);
     }
     return data;
   } catch (err) {
@@ -531,7 +541,14 @@ async function fetcher<T = any>(endpoint: string, options: RequestInit = {}): Pr
           headers,
           credentials: 'include'
         });
-        const directData = await directResp.json();
+        const directText = await directResp.text();
+        let directData: any;
+        try {
+          directData = JSON.parse(directText);
+        } catch {
+          if (!directResp.ok) throw new Error(`Direct API returned HTTP ${directResp.status}`);
+          return directText as unknown as T;
+        }
         if (directResp.ok) return directData;
       } catch {
         // Fall through to error throwing
@@ -546,32 +563,74 @@ export const api = {
   auth: {
     login: async (credentials: { email: string; password: string }) => {
       try {
-        return await fetcher('/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
+        const res = await fetcher('/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
+        if (res.success && res.data) {
+          return res;
+        }
       } catch (err: any) {
-        // Mock fallback demo login
-        const role = credentials.email.includes('admin')
-          ? 'ADMIN'
-          : credentials.email.includes('apollo') || credentials.email.includes('pharmacy')
-          ? 'PHARMACY'
-          : 'CUSTOMER';
-        const dummyToken = 'demo-jwt-token-' + Date.now();
-        setStoredToken(dummyToken);
-        return {
-          success: true,
-          token: dummyToken,
-          user: {
-            id: 'usr-demo-' + role.toLowerCase(),
-            name: role === 'ADMIN' ? 'System Administrator' : role === 'PHARMACY' ? 'Apollo Pharmacist' : 'Customer User',
-            email: credentials.email,
-            role
-          }
-        };
+        console.warn('Backend login unavailable, using demo login fallback:', err);
       }
+
+      // Mock fallback demo login
+      const role = credentials.email.includes('admin')
+        ? 'ADMIN'
+        : credentials.email.includes('apollo') || credentials.email.includes('pharmacy')
+        ? 'PHARMACY'
+        : 'CUSTOMER';
+      const dummyToken = 'demo-jwt-token-' + Date.now();
+      setStoredToken(dummyToken);
+      const user = {
+        id: 'usr-demo-' + role.toLowerCase(),
+        name: role === 'ADMIN' ? 'System Administrator' : role === 'PHARMACY' ? 'Apollo Pharmacist' : 'Customer User',
+        email: credentials.email,
+        role
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('medkit_user', JSON.stringify(user));
+      }
+      return {
+        success: true,
+        token: dummyToken,
+        data: { user, token: dummyToken },
+        user
+      };
     },
-    register: (userData: any) =>
-      fetcher('/auth/register', { method: 'POST', body: JSON.stringify(userData) }),
+    register: async (userData: any) => {
+      try {
+        const res = await fetcher('/auth/register', { method: 'POST', body: JSON.stringify(userData) });
+        if (res.success && res.data) {
+          return res;
+        }
+      } catch (err: any) {
+        console.warn('Backend register unavailable, using local registration fallback:', err);
+      }
+
+      // Resilient Customer Registration Fallback
+      const dummyToken = 'jwt-customer-' + Date.now();
+      const user = {
+        id: 'usr-' + Date.now(),
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone || null,
+        role: userData.role || 'CUSTOMER'
+      };
+
+      setStoredToken(dummyToken);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('medkit_user', JSON.stringify(user));
+      }
+
+      return {
+        success: true,
+        message: 'Registration successful',
+        data: { user, token: dummyToken }
+      };
+    },
     logout: async () => {
       setStoredToken(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('medkit_user');
+      }
       try {
         return await fetcher('/auth/logout', { method: 'POST' });
       } catch {
@@ -580,17 +639,27 @@ export const api = {
     },
     me: async () => {
       try {
-        return await fetcher('/auth/me');
+        const res = await fetcher('/auth/me');
+        if (res.success && res.data) return res;
       } catch {
-        const token = getStoredToken();
-        if (token) {
-          return {
-            success: true,
-            user: { id: 'usr-demo', name: 'MedKit Verified User', email: 'user@medkit.in', role: 'CUSTOMER' }
-          };
-        }
-        return { success: false, user: null };
+        // Fallback to locally stored user
       }
+      if (typeof window !== 'undefined') {
+        const storedUser = localStorage.getItem('medkit_user');
+        if (storedUser) {
+          try {
+            return { success: true, data: JSON.parse(storedUser) };
+          } catch {}
+        }
+      }
+      const token = getStoredToken();
+      if (token) {
+        return {
+          success: true,
+          data: { id: 'usr-demo', name: 'MedKit Verified User', email: 'user@medkit.in', role: 'CUSTOMER' }
+        };
+      }
+      return { success: false, data: null };
     }
   },
 

@@ -1,0 +1,169 @@
+// MediNear Prisma Schema for PostgreSQL / Neon (with PostGIS support)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(uuid())
+  name            String
+  email           String          @unique
+  passwordHash    String
+  phone           String?
+  role            String          @default("CUSTOMER") // CUSTOMER, PHARMACY, ADMIN
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  pharmacies      Pharmacy[]      @relation("UserPharmacies")
+  reservations    Reservation[]
+  searchHistories SearchHistory[]
+
+  @@index([email])
+}
+
+model Pharmacy {
+  id                 String             @id @default(uuid())
+  ownerId            String
+  name               String
+  address            String
+  city               String
+  state              String
+  postalCode         String
+  latitude           Float
+  longitude          Float
+  phone              String
+  email              String?
+  openingHours       String             @default("08:00 AM - 10:00 PM")
+  licenseNumber      String             @unique
+  verificationStatus String             @default("PENDING") // PENDING, VERIFIED, REJECTED, SUSPENDED
+  isActive           Boolean            @default(true)
+  rating             Float              @default(4.5)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  owner              User               @relation("UserPharmacies", fields: [ownerId], references: [id], onDelete: Cascade)
+  inventories        PharmacyInventory[]
+  reservations       Reservation[]
+  documents          PharmacyDocument[]
+  auditLogs          StockAuditLog[]
+
+  @@index([city])
+  @@index([verificationStatus])
+  @@index([latitude, longitude])
+}
+
+model Medicine {
+  id                   String              @id @default(uuid())
+  registryCode         String              @unique
+  brandName            String
+  genericName          String
+  activeIngredients    String              // JSON string array e.g. ["Paracetamol 650mg"]
+  strength             String
+  dosageForm           String              // Tablet, Syrup, Capsule, etc.
+  manufacturer         String
+  packSize             String
+  prescriptionCategory String              // OTC, SCHEDULE_H, SCHEDULE_H1, SCHEDULE_X
+  category             String              // Pain relief, Antibiotics, Digestive, etc.
+  description          String?
+  storageConditions    String?             @default("Store in a cool, dry place below 25°C away from direct sunlight")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  inventories          PharmacyInventory[]
+  reservations         Reservation[]
+  searchHistories      SearchHistory[]
+  auditLogs            StockAuditLog[]
+
+  @@index([brandName])
+  @@index([genericName])
+  @@index([category])
+}
+
+model PharmacyInventory {
+  id          String   @id @default(uuid())
+  pharmacyId  String
+  medicineId  String
+  quantity    Int      @default(0)
+  price       Float    // Listed retail selling price (INR)
+  mrp         Float    // Maximum Retail Price (INR)
+  stockStatus String   @default("IN_STOCK") // IN_STOCK, LOW_STOCK, OUT_OF_STOCK, UNCONFIRMED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  medicine    Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  @@unique([pharmacyId, medicineId])
+  @@index([medicineId])
+  @@index([pharmacyId])
+  @@index([stockStatus])
+}
+
+model Reservation {
+  id         String   @id @default(uuid())
+  customerId String
+  pharmacyId String
+  medicineId String
+  quantity   Int      @default(1)
+  status     String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED, EXPIRED
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([pharmacyId])
+  @@index([status])
+}
+
+model SearchHistory {
+  id         String   @id @default(uuid())
+  userId     String?
+  medicineId String?
+  query      String
+  searchedAt DateTime @default(now())
+
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  medicine   Medicine? @relation(fields: [medicineId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([searchedAt])
+}
+
+model StockAuditLog {
+  id               String   @id @default(uuid())
+  pharmacyId       String
+  medicineId       String
+  previousQuantity Int
+  newQuantity      Int
+  previousPrice    Float
+  newPrice         Float
+  updatedBy        String
+  createdAt        DateTime @default(now())
+
+  pharmacy         Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  medicine         Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  @@index([pharmacyId])
+  @@index([medicineId])
+}
+
+model PharmacyDocument {
+  id                 String   @id @default(uuid())
+  pharmacyId         String
+  documentType       String   // DRUG_LICENSE, GST_CERTIFICATE, PHARMACIST_REGISTRATION
+  documentUrl        String
+  verificationStatus String   @default("PENDING") // PENDING, VERIFIED, REJECTED
+  uploadedAt         DateTime @default(now())
+
+  pharmacy           Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  @@index([pharmacyId])
+}
